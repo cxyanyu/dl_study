@@ -1,0 +1,6 @@
+model_checkpoint_path: "model32-42100"
+all_model_checkpoint_paths: "model32-41700"
+all_model_checkpoint_paths: "model32-41800"
+all_model_checkpoint_paths: "model32-41900"
+all_model_checkpoint_paths: "model32-42000"
+all_model_checkpoint_paths: "model32-42100"
