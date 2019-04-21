@@ -33,15 +33,26 @@ def split_word(input_file, output_file):
 from gensim.models import word2vec
 from gensim.models import Word2Vec
 from gensim.models import KeyedVectors
+from gensim.models.word2vec import LineSentence
 
 def test_print(model):
     model_len = len(model.wv.vocab)
     print('cn_model len: ', model_len)
-    #embedding_dim = model[u'酒店'].shape[0]
-    #print('词向量的长度为{}'.format(embedding_dim))
-    #print u'酒店'
-    #print model[u'酒店']
-    #print model.wv.vocab[u'酒店'].index   
+    embedding_dim = model[u'a'].shape[0]
+    print('词向量的长度为{}'.format(embedding_dim))
+    print_char(model, u'a')
+    print_char(model, u',')
+    print_char(model, u'。')
+    print_char(model, u'，')
+    print_char(model, u'.')
+    print_char(model, u'无')
+    print_char(model, u'理')
+    print_char(model, u'长')
+
+def print_char(model, c):
+    print c
+    print model.wv.vocab[c].index   
+    print model[c]
 
 def w2v(input_file, output_file):
 
@@ -51,7 +62,7 @@ def w2v(input_file, output_file):
          #model = Word2Vec.load(output_file,  mmap='r')
          model = Word2Vec.load(output_file)
          #wv = KeyedVectors.load_word2vec_format(output_file, binary=True)
-         test_print(model)
+         #test_print(model)
          
   
     logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
@@ -66,8 +77,19 @@ def w2v(input_file, output_file):
            if len(t) > 0:
              txtlist.append(t.split())
              #print t.split()
-        #model.train(txtlist, total_examples=model.corpus_count, epochs=model.epochs)
-        model.train(txtlist, total_examples=1, epochs=1)
+
+        model.build_vocab(LineSentence(input_file),update=True)
+        #sentences = word2vec.Text8Corpus(input_file)
+        #model.build_vocab(sentences)
+        
+    
+        
+        #model.train(sentences, total_examples=model.corpus_count, epochs=model.epochs)
+        model.train(LineSentence(input_file), total_examples=model.corpus_count, epochs=model.epochs)
+        
+        #model.train(txtlist, total_examples=1, epochs=1)
+        
+        #model.train(txtlist, total_examples=1, epochs=1)
         
         #sentences = word2vec.Text8Corpus(input_file)
         #print model.corpus_count
