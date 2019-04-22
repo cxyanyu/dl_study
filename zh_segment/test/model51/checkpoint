@@ -1,0 +1,6 @@
+model_checkpoint_path: "model50-360900"
+all_model_checkpoint_paths: "model50-360500"
+all_model_checkpoint_paths: "model50-360600"
+all_model_checkpoint_paths: "model50-360700"
+all_model_checkpoint_paths: "model50-360800"
+all_model_checkpoint_paths: "model50-360900"
