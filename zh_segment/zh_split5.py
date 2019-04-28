@@ -376,7 +376,7 @@ class SentenceClasscify:
         writer=tf.summary.FileWriter(logdir,sess.graph)
 
         #batchSize = self.__input_data.shape[0]
-        iterations = 100000
+        iterations = 10000000
         print('..........')
         f = io.open(infile, 'r')
         #lineNum = self.getLineNum(f)
@@ -394,7 +394,7 @@ class SentenceClasscify:
 
               
                           
-            if (i%10==0):
+            if (i%50==0):
                 print ("training %d batch..." %i)
                 #next_batch, next_batch_labels = self.get_train_batch2(batchSize)
                 loss_ = sess.run(self.__loss, {self.__input_data: next_batch, self.__labels: next_batch_labels})
