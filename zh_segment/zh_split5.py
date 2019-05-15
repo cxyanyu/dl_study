@@ -170,8 +170,8 @@ class SentenceClasscify:
         
     def creataModel(self, batchSize):
         #tf.reset_default_graph()
-        print "self.__lableSize %d" %self.__lableSize 
-        self.__labels = tf.placeholder(tf.float32, [None, self.__lableSize], name='labels')
+        #print "self.__labelSize %d" %self.__labelSize 
+        self.__labels = tf.placeholder(tf.float32, [None, self.__labelSize], name='labels')
         self.__input_data = tf.placeholder(tf.int32, [None, self.__maxSeqLength], name='input')
         
         #data = tf.Variable(tf.zeros([tf.shape(self.__input_data)[0], self.__maxSeqLength, self.__wv_dim]), dtype=tf.float32)
@@ -234,9 +234,9 @@ class SentenceClasscify:
         mlstm_cell = tf.contrib.rnn.MultiRNNCell([tf.contrib.rnn.BasicLSTMCell(self.__lstmUnits2) for _ in range(5)] )
         value, _ = tf.nn.dynamic_rnn(mlstm_cell, bilstmlast, dtype=tf.float32)
         print "print value.shape " + str(value.shape)
-        weight2 = tf.Variable(tf.truncated_normal([self.__lstmUnits2, self.__lableSize]))
-        #bias2 = tf.Variable(tf.constant(0.1, shape=[self.__lableSize]))
-        bias2 = tf.Variable(tf.random_normal([self.__lableSize]))
+        weight2 = tf.Variable(tf.truncated_normal([self.__lstmUnits2, self.__labelSize]))
+        #bias2 = tf.Variable(tf.constant(0.1, shape=[self.__labelSize]))
+        bias2 = tf.Variable(tf.random_normal([self.__labelSize]))
         value = tf.transpose(value, [1, 0, 2])
         #last = tf.gather(value, int(value.get_shape()[0]) - 1)
         last = value[-1]
@@ -523,7 +523,7 @@ class SentenceClasscify:
         #print len(_y[0])
         #print len(_y[10])
         #print len(_y[100])
-        #self.__lableSize = len(_y[0])
+        #self.__labelSize = len(_y[0])
         return _x, _y 
         
         
@@ -594,7 +594,7 @@ class SentenceClasscify:
         print len(_y[0])
         print len(_y[10])
         #print len(_y[100])
-        self.__lableSize = len(_y[0])
+        self.__labelSize = len(_y[0])
         return _x, _y 
         
     def __padding(self, tokens, max_tokens):
