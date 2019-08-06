@@ -99,7 +99,7 @@ def w2v(input_file, output_file):
     else:
         print "start trainning..."
         sentences = word2vec.Text8Corpus(input_file)
-        model = word2vec.Word2Vec(sentences, size=250, window=4, min_count = 1)
+        model = word2vec.Word2Vec(sentences, size=400, window=4, min_count = 1)
 
     model.save(output_file)
     test_print(model)

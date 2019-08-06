@@ -364,7 +364,7 @@ class Model:
     __prediction = None
     __optimizer = None
 
-    def __init__(self, wv, model_filename, seqLength = None, label_size = None, lr = 0.001, min_lr = 0.00001):
+    def __init__(self, wv, model_filename, seqLength = None, label_size = None, lr = 0.001, min_lr = 0.00001, is_train = False):
         self.__wv = wv
         self.__save_path = model_filename
         self.__lr = lr
@@ -375,16 +375,18 @@ class Model:
         self.__sess = tf.InteractiveSession()
 
         if self.is_model_file_exit(model_filename):
-            #try:
+            try:
                 self.load_model(model_filename)
                 print "load model!"
-            #except :
-            #    print "load model failed!"
+            except :
+                print "load model failed!"
 
         if self.__prediction == None:
-            self.createModel(label_size)
+            self.createModel(label_size, is_train)
             tf.train.export_meta_graph(filename=model_filename + '/' + self.__model_name + '.meta')
             self.__saver = tf.train.Saver(max_to_keep = 1)
+            if self.is_model_file_exit(model_filename):
+                self.__saver.restore(self.__sess, tf.train.latest_checkpoint(model_filename))
         
         tf.summary.scalar('loss', self.__loss)
         tf.summary.scalar('Accrar', self.__acc)
@@ -416,7 +418,7 @@ class Model:
         for i,n in enumerate(graph_def.node):
 	    print("Name of the node - %s" % n.name)
 
-    def createModel(self, tagNum, is_train= False):
+    def createModel(self, tagNum, is_train):
         print "create mode.........."
         print "lr %f, min_lr %f" %(self.__lr, self.__min_lr)
         print "word2vector size %d, vector dim %d" %(self.__wv.getSize(), self.__wv.getVectrDim())
@@ -435,21 +437,23 @@ class Model:
                 output_keep_prob=output_keep_prob,
                 input_keep_prob=input_keep_prob)
             return cell
-        
-        fw1 = lstm(32)            
-        fw2 = lstm(64)            
-        bw1 = lstm(32)            
-        bw2 = lstm(64)            
-        fws = tf.contrib.rnn.MultiRNNCell([fw1, fw2])
-        bws = tf.contrib.rnn.MultiRNNCell([bw1, bw2])
+        if is_train:
+            output_keep_prob = 0.85
+        else:
+            output_keep_prob = 1.0
+        fws = [lstm(64, output_keep_prob=output_keep_prob), lstm(64), lstm(64), lstm(32)]
+        bws = [lstm(64, output_keep_prob=output_keep_prob), lstm(64), lstm(64), lstm(32)]
+        fws = tf.contrib.rnn.MultiRNNCell(fws)
+        bws = tf.contrib.rnn.MultiRNNCell(bws)
 
         output, output_states = tf.nn.bidirectional_dynamic_rnn(
                           fws, bws, data, sequence_length = self.__sequence_length, dtype = tf.float32)
-        output = tf.concat([output[0], output[1]], axis=-1)
+        value = tf.concat([output[0], output[1]], axis=-1)
+        
 
-        cells = [lstm(64), lstm(64)]
-        cells = tf.contrib.rnn.MultiRNNCell(cells)
-        value, _ = tf.nn.dynamic_rnn(cells, output, dtype=tf.float32)
+        #cells = [lstm(64)]
+        #cells = tf.contrib.rnn.MultiRNNCell(cells)
+        #value, _ = tf.nn.dynamic_rnn(cells, value, dtype=tf.float32)
 
         print value.shape
         
@@ -491,6 +495,8 @@ class Model:
         corpus.setBatchSize(batch_size)
         for i in xrange(epochs):
             self.__train(corpus, test_corpus, i, merged, writer)
+            save_path = self.__saver.save(self.__sess, self.__save_path + "/" + self.__model_name, global_step=i)
+            print("saved to %s"% save_path)
 
 
     def __train(self, corpus, test_corpus, loop, merged, writer):
@@ -659,14 +665,14 @@ def main():
         files = opts.predict.split(u",")
         predict_cps = Corpus(wv, files[0], seqMaxLen=seqMaxLen)
         if not model:
-            model = Model(wv, opts.model_filename)
+            model = Model(wv, opts.model_filename, label_size = 32)
         #model.predict(predict_cps, files[1])
         predict_cps.predictOutput(files[1], model)
             
     if opts.input:
        inp = opts.input.decode(sys.stdin.encoding)
        if not model:
-            model = Model(wv, opts.model_filename)
+            model = Model(wv, opts.model_filename, label_size = 32)
        model.predict_one(inp)
        model.input_predict()
        

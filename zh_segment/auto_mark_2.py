@@ -34,8 +34,8 @@ def split_word(input_file, output_file):
                 
             output.write(marks)
             output.write(u'\n')
-            #output.write(u"".join(words))
-            output.write(line)
+            output.write(u"".join(words))
+            #output.write(line)
             output.write(u'\n')
             #out_lines += marks
             #out_lines += u'\n'

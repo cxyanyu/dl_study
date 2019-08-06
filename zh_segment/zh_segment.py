@@ -190,9 +190,9 @@ class SentenceClasscify:
         data = tf.nn.embedding_lookup(self.__wv_matrix, self.__input_data)
 
         lstm_qx = tf.contrib.rnn.BasicLSTMCell(self.__lstmUnits, forget_bias = 1.0)
-        lstm_qx = tf.contrib.rnn.DropoutWrapper(cell=lstm_qx, output_keep_prob=0.75)
+        #lstm_qx = tf.contrib.rnn.DropoutWrapper(cell=lstm_qx, output_keep_prob=0.75)
         lstm_hx = tf.contrib.rnn.BasicLSTMCell(self.__lstmUnits, forget_bias = 1.0)
-        lstm_hx = tf.contrib.rnn.DropoutWrapper(cell=lstm_hx, output_keep_prob=0.75)
+        #lstm_hx = tf.contrib.rnn.DropoutWrapper(cell=lstm_hx, output_keep_prob=0.75)
 
         output1, output_states = tf.nn.bidirectional_dynamic_rnn(lstm_qx, lstm_hx, data, sequence_length = self.__sequence_length, dtype = tf.float32)
         outputs1 = [output1[0],output1[1]]
@@ -208,15 +208,15 @@ class SentenceClasscify:
 
 
         lstmCell1 = tf.contrib.rnn.BasicLSTMCell(24)
-        lstmCell1 = tf.contrib.rnn.DropoutWrapper(cell=lstmCell1, output_keep_prob=0.75)
+        #lstmCell1 = tf.contrib.rnn.DropoutWrapper(cell=lstmCell1, output_keep_prob=0.75)
         lstmCell2 = tf.contrib.rnn.BasicLSTMCell(24)
-        lstmCell2 = tf.contrib.rnn.DropoutWrapper(cell=lstmCell2, output_keep_prob=0.75)
+        #lstmCell2 = tf.contrib.rnn.DropoutWrapper(cell=lstmCell2, output_keep_prob=0.75)
         lstmCell3 = tf.contrib.rnn.BasicLSTMCell(24)
-        lstmCell3 = tf.contrib.rnn.DropoutWrapper(cell=lstmCell3, output_keep_prob=0.75)
+        #lstmCell3 = tf.contrib.rnn.DropoutWrapper(cell=lstmCell3, output_keep_prob=0.75)
         lstmCell4 = tf.contrib.rnn.BasicLSTMCell(24)
-        lstmCell4 = tf.contrib.rnn.DropoutWrapper(cell=lstmCell4, output_keep_prob=0.75)
+        #lstmCell4 = tf.contrib.rnn.DropoutWrapper(cell=lstmCell4, output_keep_prob=0.75)
         lstmCell = tf.contrib.rnn.BasicLSTMCell(self.__tagNum)
-        lstmCell = tf.contrib.rnn.DropoutWrapper(cell=lstmCell2, output_keep_prob=0.75)
+        #lstmCell = tf.contrib.rnn.DropoutWrapper(cell=lstmCell2, output_keep_prob=0.75)
         mlstm_cell = tf.contrib.rnn.MultiRNNCell([lstmCell1, lstmCell2, lstmCell3, lstmCell4, lstmCell] )
         value, _ = tf.nn.dynamic_rnn(mlstm_cell, bilstmoutputs, dtype=tf.float32)
 
@@ -313,6 +313,7 @@ class SentenceClasscify:
             print text
             x.append(self.sentence2tokens(text))
             x = self.__padding(x, self.__maxSeqLength)
+            print x
             length=[len(e) for e in x]
             y=sess.run(self.__prediction, {self.__input_data: x, self.__sequence_length: length})
             #y = tf.argmax(y, 2)
@@ -338,7 +339,7 @@ class SentenceClasscify:
 
         
         
-    def train(self, model_path, infile, batchSize=128):
+    def train(self, model_path, infile, batchSize=256):
     
         model_name = os.path.basename(model_path.rstrip('/'))
         tf.reset_default_graph()        
@@ -367,7 +368,7 @@ class SentenceClasscify:
         tf.summary.scalar('loss', self.__loss)
         tf.summary.scalar('Accrar', self.__acc)
         
-        #print tf.summary
+        print tf.summary
         merged=tf.summary.merge_all()
         logdir='tensorboard/'+ datetime.datetime.now().strftime("%Y%m%d-%H%M%S")+"/"
         writer=tf.summary.FileWriter(logdir,sess.graph)
@@ -382,6 +383,11 @@ class SentenceClasscify:
                 
             #next_batch, next_batch_labels = self.get_train_batch2(batchSize)
             next_batch, next_batch_labels, next_seq_length = self.loadBatch(f, batchSize)
+            #print next_batch[0]
+            #print next_batch_labels[0]
+            #print next_seq_length[0]
+            #print next_seq_length
+
             #print np.array(next_batch).shape
             #print np.array(next_batch_labels).shape
             #print np.array(next_seq_length).shape
